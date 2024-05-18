@@ -13,6 +13,4 @@ import java.util.List;
 @Builder
 public class AirplaneDTO {
     private String name;
-    private List<Pressure> pressures;
-    private List<Temperature> Temperatures;
 }

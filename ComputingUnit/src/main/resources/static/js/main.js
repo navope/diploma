@@ -1,43 +1,61 @@
 'use strict';
 
-var dataArea = document.querySelector('#dataArea');
+const alarmSound = document.getElementById('alarm-sound');
+const temperatureValue = document.getElementById('temperature-value');
+const pressureValue = document.getElementById('pressure-value');
 
-var stompClient = null;
+const maxTemperature = 100; // Example threshold, replace with actual value
+const maxPressure = 200; // Example threshold, replace with actual value
 
-function connect() {
-    var socket = new SockJS('/ws');
-    stompClient = Stomp.over(socket);
+const stompClient = new StompJs.Client({
+    brokerURL: 'ws://localhost:8080/interface'
+});
 
-    stompClient.connect({}, onConnected, onError);
+stompClient.onConnect = (frame) => {
+    console.log('Connected: ' + frame);
+    stompClient.subscribe('/topic/sensorsData', (message) => {
+        const data = JSON.parse(message.body);
+        updateSensorData(data);
+    });
+};
+
+stompClient.onWebSocketError = (error) => {
+    console.error('Error with websocket', error);
+};
+
+stompClient.onStompError = (frame) => {
+    console.error('Broker reported error: ' + frame.headers['message']);
+    console.error('Additional details: ' + frame.body);
+};
+
+stompClient.activate();
+
+function updateSensorData(data) {
+    const temperature = data.temperatureDTO.value;
+    const pressure = data.pressureDTO.value;
+
+    temperatureValue.textContent = `${temperature}°C`;
+    pressureValue.textContent = `${pressure} Pa`;
+
+    checkThresholds(temperature, pressure);
 }
 
-function onConnected() {
-    // Subscribe to the Sensor Data Topic
-    stompClient.subscribe('/topic/sensorData', onDataReceived);
+function checkThresholds(temperature, pressure) {
+    if (temperature > maxTemperature) {
+        document.getElementById('temperature').style.backgroundColor = 'red';
+        playAlarm();
+    } else {
+        document.getElementById('temperature').style.backgroundColor = 'green';
+    }
+
+    if (pressure > maxPressure) {
+        document.getElementById('pressure').style.backgroundColor = 'red';
+        playAlarm();
+    } else {
+        document.getElementById('pressure').style.backgroundColor = 'green';
+    }
 }
 
-function onError(error) {
-    console.error('Could not connect to WebSocket server. Please refresh this page to try again!', error);
+function playAlarm() {
+    alarmSound.play();
 }
-
-function onDataReceived(payload) {
-    var data = JSON.parse(payload.body);
-
-    var dataElement = document.createElement('li');
-
-    var typeElement = document.createElement('span');
-    var typeText = document.createTextNode(data.type + ": ");
-    typeElement.appendChild(typeText);
-    dataElement.appendChild(typeElement);
-
-    var valueElement = document.createElement('span');
-    var valueText = document.createTextNode(data.value + " at " + data.timestamp);
-    valueElement.appendChild(valueText);
-    dataElement.appendChild(valueElement);
-
-    dataArea.appendChild(dataElement);
-    dataArea.scrollTop = dataArea.scrollHeight;
-}
-
-// Connect to the WebSocket server
-connect();

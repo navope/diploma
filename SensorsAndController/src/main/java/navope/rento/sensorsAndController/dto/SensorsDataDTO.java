@@ -1,4 +1,4 @@
-package navope.rento.computingUnit.dto;
+package navope.rento.sensorsAndController.dto;
 
 import lombok.*;
 
@@ -7,7 +7,7 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
-public class SensorDataDTO {
+public class SensorsDataDTO {
     PressureDTO pressureDTO;
     TemperatureDTO temperatureDTO;
 }
