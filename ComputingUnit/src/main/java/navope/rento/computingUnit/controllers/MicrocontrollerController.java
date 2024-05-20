@@ -16,7 +16,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/sensors")
+@RequestMapping("/microcontroller")
 @RequiredArgsConstructor
 public class MicrocontrollerController {
 

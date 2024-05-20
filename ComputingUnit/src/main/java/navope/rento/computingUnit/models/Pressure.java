@@ -6,7 +6,7 @@ import javax.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "Pressure")
+@Table(name = "pressure")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
