@@ -13,8 +13,14 @@ import java.util.*;
 public class Main {
 
     public final static int QUANTITY  = 100;
-    public final static Double MAX_VALUE = 45.0;
-    
+//    public static void main(String[] args) {
+//        for (int i = 0; i < 50; i ++) {
+//            double a = LM35.getAnalogValue();
+//            System.out.println(a * 100);
+//            double b = STM32F103C8T6.getTemperature();
+//            System.out.println(b);
+//        }
+//    }
 
     public static void main(String[] args) {
 
@@ -52,9 +58,12 @@ public class Main {
         }
     }
 
-    public static class LM35 {
-        public static final double VOLTAGE_MIN = -0.55;
-        public static final double VOLTAGE_MAX = 1.5;
+    public static class TMP36 {
+        public static final double THRESHOLD_VALUE_VOLTAGE_IN_DIGITAL_FORM = 81.92;
+        public static final double TEMPERATURE_MIN = -40;
+        final static double VOLTAGE_OFFSET = 0.5;
+        public static final double VOLTAGE_MIN = 0;
+        public static final double VOLTAGE_MAX = 1.75;
         private static final Random random = new Random();
         public static double getAnalogValue() {
             return VOLTAGE_MIN + (VOLTAGE_MAX - VOLTAGE_MIN) * random.nextDouble();
@@ -74,38 +83,41 @@ public class Main {
 
 
     public static class STM32F103C8T6 {
-
-        public static final double REFERENCE_VOLTAGE= 3.3;
-        public static final double ADC_RANGE = 4096;
-        public static double convertVoltageToTemperature(double digitalVoltage) {
-            return Math.floor(digitalVoltage / 0.01);
-        }
-        public static double convertVoltageToPressure(double digitalVoltage) {
-            final double psiToPascal = 6894.76;
-            final double voltageMin = 1.0;
-            final double voltageMax = 5.0;
-            final double pressureMaxPsi = 30.0;
-            final double pressureMinPsi = 0.0;
-
-            double pressurePsi = ((digitalVoltage - voltageMin) * (pressureMaxPsi - pressureMinPsi)) / (voltageMax - voltageMin) +
-                    pressureMinPsi;
-            return pressurePsi * psiToPascal;
-        }
-
+        final static double REFERENCE_VOLTAGE = 5;
+        final static double DIGITAL_VALUE_MIN = 0;
+        final static double DIGITAL_VALUE_MAX = 4095 ;
         public static double adc(double analogVoltage) {
-            double digitalValue = (analogVoltage / REFERENCE_VOLTAGE) * ADC_RANGE;
-            double digitalVoltage = (digitalValue / ADC_RANGE) * REFERENCE_VOLTAGE;
-            return Math.floor(digitalVoltage);
+            double digitalValue = (analogVoltage / U5244_000005_030PA.VOLTAGE_MIN) * DIGITAL_VALUE_MAX;
+            return digitalValue;
         }
 
         public static double getTemperature() {
-            double digitalValue =  adc((LM35.getAnalogValue()));
+            double digitalValue =  adc((TMP36.getAnalogValue()));
             return convertVoltageToTemperature(digitalValue);
         }
 
         public static double getPressure() {
             double digitalValue = adc(U5244_000005_030PA.getAnalogValue());
             return convertVoltageToPressure(digitalValue);
+        }
+        public static double convertVoltageToTemperature(double digitalValue) {
+            if (digitalValue > TMP36.THRESHOLD_VALUE_VOLTAGE_IN_DIGITAL_FORM) {
+                return (digitalValue * REFERENCE_VOLTAGE / STM32F103C8T6.DIGITAL_VALUE_MAX - TMP36.VOLTAGE_OFFSET) /
+                        0.01;
+            }else {
+                return TMP36.TEMPERATURE_MIN;
+            }
+        }
+        public static double convertVoltageToPressure(double digitalValue) {
+            final double psiToPascal = 6894.76;
+            final double pressureMaxPsi = 30.0;
+            final double pressureMinPsi = 0.0;
+            final double pressureMax = pressureMaxPsi * psiToPascal;
+            final double pressureMix = pressureMinPsi * psiToPascal;
+
+            double pressure = pressureMix + ((digitalValue - DIGITAL_VALUE_MIN) * (pressureMax - pressureMix)) /
+                    (DIGITAL_VALUE_MAX - DIGITAL_VALUE_MIN);
+            return Math.floor(pressure);
         }
     }
 }
