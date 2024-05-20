@@ -30,79 +30,156 @@
 <!--</body>-->
 <!--</html>-->
 
-<!DOCTYPE html>
-<html lang="en">
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Sensor Monitoring</title>-->
+<!--    <link rel="stylesheet" href="/css/main.css">-->
+<!--</head>-->
+<!--<body>-->
+<!--<div id="monitoring-page">-->
+<!--    <div class="monitoring-container">-->
+<!--        <h1 class="title">Sensor Monitoring</h1>-->
+<!--        <div id="sensors">-->
+<!--            <div id="temperature" class="sensor-box">-->
+<!--                <h2>Temperature</h2>-->
+<!--                <p id="temperature-value">0°C</p>-->
+<!--            </div>-->
+<!--            <div id="pressure" class="sensor-box">-->
+<!--                <h2>Pressure</h2>-->
+<!--                <p id="pressure-value">0 Pa</p>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+<!--<audio id="alarm-sound" src="/sounds/alarm.mp3" preload="auto"></audio>-->
+
+<!--<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>-->
+<!--<script>-->
+<!--    let stompClient = null;-->
+
+<!--    function connect() {-->
+<!--        const socket = new SockJS('/interface');-->
+<!--        stompClient = Stomp.over(socket);-->
+
+<!--        stompClient.connect({}, (frame) => {-->
+<!--            console.log('Connected: ' + frame);-->
+<!--            stompClient.subscribe('/topic/sensorsData', (message) => {-->
+<!--                showSensorData(JSON.parse(message.body));-->
+<!--            });-->
+<!--        });-->
+<!--    }-->
+
+<!--    function showSensorData(sensorData) {-->
+<!--        const temperatureValueElement = document.getElementById("temperature-value");-->
+<!--        const pressureValueElement = document.getElementById("pressure-value");-->
+
+<!--        temperatureValueElement.textContent = sensorData.temperatureDTO.value + "°C";-->
+<!--        pressureValueElement.textContent = sensorData.pressureDTO.value + " Pa";-->
+
+<!--        const temperatureBox = document.getElementById("temperature");-->
+<!--        const pressureBox = document.getElementById("pressure");-->
+
+<!--        if (sensorData.temperatureDTO.value > TEMPERATURE_THRESHOLD) {-->
+<!--            temperatureBox.style.backgroundColor = "red";-->
+<!--            document.getElementById("alarm-sound").play();-->
+<!--        } else {-->
+<!--            temperatureBox.style.backgroundColor = "green";-->
+<!--        }-->
+
+<!--        if (sensorData.pressureDTO.value > PRESSURE_THRESHOLD) {-->
+<!--            pressureBox.style.backgroundColor = "red";-->
+<!--            document.getElementById("alarm-sound").play();-->
+<!--        } else {-->
+<!--            pressureBox.style.backgroundColor = "green";-->
+<!--        }-->
+<!--    }-->
+
+<!--    document.addEventListener("DOMContentLoaded", () => {-->
+<!--        connect();-->
+<!--    });-->
+
+<!--    const TEMPERATURE_THRESHOLD = 50; // Пример порогового значения для температуры-->
+<!--    const PRESSURE_THRESHOLD = 1000; // Пример порогового значения для давления-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
+
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sensor Monitoring</title>
-    <link rel="stylesheet" href="/css/main.css">
+    <title>Chat WebSocket</title>
+    <script src="resources/js/sockjs-0.3.4.js"></script>
+    <script src="resources/js/stomp.js"></script>
+    <script type="text/javascript">
+        var stompClient = null;
+
+        function setConnected(connected) {
+            document.getElementById('connect').disabled = connected;
+            document.getElementById('disconnect').disabled = !connected;
+            document.getElementById('conversationDiv').style.visibility
+                = connected ? 'visible' : 'hidden';
+            document.getElementById('response').innerHTML = '';
+        }
+
+        function connect() {
+            var socket = new SockJS('/chat');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function(frame) {
+                setConnected(true);
+                console.log('Connected: ' + frame);
+                stompClient.subscribe('/topic/messages', function(messageOutput) {
+                    showMessageOutput(JSON.parse(messageOutput.body));
+                });
+            });
+        }
+
+        function disconnect() {
+            if(stompClient != null) {
+                stompClient.disconnect();
+            }
+            setConnected(false);
+            console.log("Disconnected");
+        }
+
+        function sendMessage() {
+            var from = document.getElementById('from').value;
+            var text = document.getElementById('text').value;
+            stompClient.send("/app/chat", {},
+                JSON.stringify({'from':from, 'text':text}));
+        }
+
+        function showMessageOutput(messageOutput) {
+            var response = document.getElementById('response');
+            var p = document.createElement('p');
+            p.style.wordWrap = 'break-word';
+            p.appendChild(document.createTextNode(messageOutput.from + ": "
+                + messageOutput.text + " (" + messageOutput.time + ")"));
+            response.appendChild(p);
+        }
+    </script>
 </head>
-<body>
-<div id="monitoring-page">
-    <div class="monitoring-container">
-        <h1 class="title">Sensor Monitoring</h1>
-        <div id="sensors">
-            <div id="temperature" class="sensor-box">
-                <h2>Temperature</h2>
-                <p id="temperature-value">0°C</p>
-            </div>
-            <div id="pressure" class="sensor-box">
-                <h2>Pressure</h2>
-                <p id="pressure-value">0 Pa</p>
-            </div>
-        </div>
+<body onload="disconnect()">
+<div>
+    <div>
+        <input type="text" id="from" placeholder="Choose a nickname"/>
+    </div>
+    <br />
+    <div>
+        <button id="connect" onclick="connect();">Connect</button>
+        <button id="disconnect" disabled="disabled" onclick="disconnect();">
+            Disconnect
+        </button>
+    </div>
+    <br />
+    <div id="conversationDiv">
+        <input type="text" id="text" placeholder="Write a message..."/>
+        <button id="sendMessage" onclick="sendMessage();">Send</button>
+        <p id="response"></p>
     </div>
 </div>
-<audio id="alarm-sound" src="/sounds/alarm.mp3" preload="auto"></audio>
 
-<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
-<script>
-    let stompClient = null;
-
-    function connect() {
-        const socket = new SockJS('/interface');
-        stompClient = Stomp.over(socket);
-
-        stompClient.connect({}, (frame) => {
-            console.log('Connected: ' + frame);
-            stompClient.subscribe('/topic/sensorsData', (message) => {
-                showSensorData(JSON.parse(message.body));
-            });
-        });
-    }
-
-    function showSensorData(sensorData) {
-        const temperatureValueElement = document.getElementById("temperature-value");
-        const pressureValueElement = document.getElementById("pressure-value");
-
-        temperatureValueElement.textContent = sensorData.temperatureDTO.value + "°C";
-        pressureValueElement.textContent = sensorData.pressureDTO.value + " Pa";
-
-        const temperatureBox = document.getElementById("temperature");
-        const pressureBox = document.getElementById("pressure");
-
-        if (sensorData.temperatureDTO.value > TEMPERATURE_THRESHOLD) {
-            temperatureBox.style.backgroundColor = "red";
-            document.getElementById("alarm-sound").play();
-        } else {
-            temperatureBox.style.backgroundColor = "green";
-        }
-
-        if (sensorData.pressureDTO.value > PRESSURE_THRESHOLD) {
-            pressureBox.style.backgroundColor = "red";
-            document.getElementById("alarm-sound").play();
-        } else {
-            pressureBox.style.backgroundColor = "green";
-        }
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-        connect();
-    });
-
-    const TEMPERATURE_THRESHOLD = 50; // Пример порогового значения для температуры
-    const PRESSURE_THRESHOLD = 1000; // Пример порогового значения для давления
-</script>
 </body>
 </html>
+

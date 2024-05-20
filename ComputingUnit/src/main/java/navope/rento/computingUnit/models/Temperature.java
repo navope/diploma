@@ -17,9 +17,6 @@ public class Temperature {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
-    @ManyToOne
-    @JoinColumn(name = "airplane_id", referencedColumnName = "id")
-    Airplane airplane;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "received_at")
     private Date receivedAt;

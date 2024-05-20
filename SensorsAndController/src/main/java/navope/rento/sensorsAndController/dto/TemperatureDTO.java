@@ -3,7 +3,6 @@ package navope.rento.sensorsAndController.dto;
 import lombok.*;
 
 import java.util.Date;
-
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

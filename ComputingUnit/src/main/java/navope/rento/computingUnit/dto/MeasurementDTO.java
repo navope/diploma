@@ -7,7 +7,7 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
-public class SensorsDataDTO {
-    PressureDTO pressureDTO;
-    TemperatureDTO temperatureDTO;
+public class MeasurementDTO {
+    private PressureDTO pressureDTO;
+    private TemperatureDTO temperatureDTO;
 }

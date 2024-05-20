@@ -1,9 +1,9 @@
 package navope.rento.computingUnit.repositories;
 
-import navope.rento.computingUnit.models.Airplane;
+import navope.rento.computingUnit.models.Microcontroller;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface AirplaneRepository extends JpaRepository<Airplane, Integer> {
+public interface MicrocontrollerRepository extends JpaRepository<Microcontroller, Integer> {
 }
