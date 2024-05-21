@@ -8,6 +8,7 @@ import navope.rento.computingUnit.services.TemperatureService;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,7 @@ public class MeasurementController {
     private final ModelMapper modelMapper;
     private final PressureService pressureService;
     private final TemperatureService temperatureService;
+    private final SimpMessagingTemplate template;
     private MeasurementDTO latestMeasurement;
 
     @PostMapping("/new")
@@ -26,28 +28,29 @@ public class MeasurementController {
         latestMeasurement = measurementDTO;
         System.out.println(latestMeasurement.getPressureDTO().getValue());
         System.out.println(latestMeasurement.getTemperatureDTO().getValue());
+        template.convertAndSend("/topic/measurements", measurementDTO);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    @GetMapping("/display")
-    public String display(Model model) {
-//        Pressure pressure = PressureService.getLastPressure();
-//        Temperature temperature = temperatureService.getLastTemperature();
-//        MeasurementDTO measurementDTO = MeasurementDTO.builder()
-//                .pressureDTO(PressureDTO.builder()
-//                        .receivedAt()
-//                        .build())
-//                .temperatureDTO(TemperatureDTO.builder()
-//                        .build())
-//                .build();
-        model.addAttribute("measurement", latestMeasurement);
-        return "templates/display";
-    }
-
-    @GetMapping("/latest-measurement")
-    @ResponseBody
-    public MeasurementDTO getLatestMeasurement() {
-        return latestMeasurement;
-    }
+//    @GetMapping("/display")
+//    public String display(Model model) {
+////        Pressure pressure = PressureService.getLastPressure();
+////        Temperature temperature = temperatureService.getLastTemperature();
+////        MeasurementDTO measurementDTO = MeasurementDTO.builder()
+////                .pressureDTO(PressureDTO.builder()
+////                        .receivedAt()
+////                        .build())
+////                .temperatureDTO(TemperatureDTO.builder()
+////                        .build())
+////                .build();
+//        model.addAttribute("measurement", latestMeasurement);
+//        return "templates/display";
+//    }
+//
+//    @GetMapping("/latest-measurement")
+//    @ResponseBody
+//    public MeasurementDTO getLatestMeasurement() {
+//        return latestMeasurement;
+//    }
 
 }

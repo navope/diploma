@@ -15,10 +15,7 @@ public class Main {
     public final static int QUANTITY  = 100;
 //    public static void main(String[] args) {
 //        for (int i = 0; i < 50; i ++) {
-//            double a = LM35.getAnalogValue();
-//            System.out.println(a * 100);
-//            double b = STM32F103C8T6.getTemperature();
-//            System.out.println(b);
+//            System.out.println(STM32F103C8T6.getPressure());
 //        }
 //    }
 
@@ -59,12 +56,14 @@ public class Main {
     }
 
     public static class TMP36 {
+        public static final double POWER_SUPPLY_VOLTAGE = 2.7;
         public static final double THRESHOLD_VALUE_VOLTAGE_IN_DIGITAL_FORM = 81.92;
         public static final double TEMPERATURE_MIN = -40;
         final static double VOLTAGE_OFFSET = 0.5;
-        public static final double VOLTAGE_MIN = 0;
+        public static final double VOLTAGE_MIN = 0.1;
         public static final double VOLTAGE_MAX = 1.75;
         private static final Random random = new Random();
+
         public static double getAnalogValue() {
             return VOLTAGE_MIN + (VOLTAGE_MAX - VOLTAGE_MIN) * random.nextDouble();
         }
@@ -75,46 +74,56 @@ public class Main {
         private static final double VOLTAGE_MAX = 5.0;
         private static final Random random = new Random();
 
-        private static double getAnalogValue() {
+        public static double getAnalogValue() {
             return VOLTAGE_MIN + (VOLTAGE_MAX - VOLTAGE_MIN) * random.nextDouble();
         }
     }
 
+    public static class VoltageDivider {
+        private static final double R1 = 5100; // 5.1 kOhm
+        private static final double R2 = 10000; // 10 kOhm
+
+        public static double convert(double inputVoltage) {
+//            double coefficient = (double) Math.round((R2 / (R1 + R2) * 100)) / 100;
+            double coefficient = 0.82;
+            return (inputVoltage - 1) * coefficient;
+        }
+    }
 
     public static class STM32F103C8T6 {
-        final static double REFERENCE_VOLTAGE = 5;
+        final static double REFERENCE_VOLTAGE = 3.3;
         final static double DIGITAL_VALUE_MIN = 0;
-        final static double DIGITAL_VALUE_MAX = 4095 ;
+        final static double DIGITAL_VALUE_MAX = 4095;
+
         public static double adc(double analogVoltage) {
-            double digitalValue = (analogVoltage / U5244_000005_030PA.VOLTAGE_MAX) * DIGITAL_VALUE_MAX;
-            return digitalValue;
+            double digitalValue = (analogVoltage / REFERENCE_VOLTAGE) * DIGITAL_VALUE_MAX;
+            return Math.floor(digitalValue);
         }
 
         public static double getTemperature() {
-            double digitalValue =  adc((TMP36.getAnalogValue()));
+            double digitalValue = adc(TMP36.getAnalogValue());
             return convertVoltageToTemperature(digitalValue);
         }
 
         public static double getPressure() {
-            double digitalValue = adc(U5244_000005_030PA.getAnalogValue());
+            double analogValue = U5244_000005_030PA.getAnalogValue();
+            double convertedValue = VoltageDivider.convert(analogValue);
+            double digitalValue = adc(convertedValue);
             return convertVoltageToPressure(digitalValue);
         }
+
         public static double convertVoltageToTemperature(double digitalValue) {
-            if (digitalValue > TMP36.THRESHOLD_VALUE_VOLTAGE_IN_DIGITAL_FORM) {
-                return (digitalValue * REFERENCE_VOLTAGE / STM32F103C8T6.DIGITAL_VALUE_MAX - TMP36.VOLTAGE_OFFSET) /
-                        0.01;
-            }else {
-                return TMP36.TEMPERATURE_MIN;
-            }
+            return (digitalValue * REFERENCE_VOLTAGE / DIGITAL_VALUE_MAX - TMP36.VOLTAGE_OFFSET) / 0.01;
         }
+
         public static double convertVoltageToPressure(double digitalValue) {
             final double psiToPascal = 6894.76;
             final double pressureMaxPsi = 30.0;
             final double pressureMinPsi = 0.0;
             final double pressureMax = pressureMaxPsi * psiToPascal;
-            final double pressureMix = pressureMinPsi * psiToPascal;
+            final double pressureMin = pressureMinPsi * psiToPascal;
 
-            double pressure = pressureMix + ((digitalValue - DIGITAL_VALUE_MIN) * (pressureMax - pressureMix)) /
+            double pressure = pressureMin + ((digitalValue - DIGITAL_VALUE_MIN) * (pressureMax - pressureMin)) /
                     (DIGITAL_VALUE_MAX - DIGITAL_VALUE_MIN);
             return pressure;
         }
