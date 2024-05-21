@@ -80,13 +80,13 @@ public class Main {
     }
 
     public static class VoltageDivider {
-        private static final double R1 = 5100; // 5.1 kOhm
-        private static final double R2 = 10000; // 10 kOhm
+        private static final double R1 = 1700; // 1.7 kOhm
+        private static final double R2 = 3300; // 3.3 kOhm
 
         public static double convert(double inputVoltage) {
 //            double coefficient = (double) Math.round((R2 / (R1 + R2) * 100)) / 100;
-            double coefficient = 0.82;
-            return (inputVoltage - 1) * coefficient;
+            double coefficient = (R2 / (R1 + R2));
+            return inputVoltage * coefficient;
         }
     }
 

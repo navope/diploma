@@ -31,6 +31,7 @@ public class MeasurementController {
         template.convertAndSend("/topic/measurements", measurementDTO);
         return ResponseEntity.ok(HttpStatus.OK);
     }
+}
 
 //    @GetMapping("/display")
 //    public String display(Model model) {
@@ -52,5 +53,3 @@ public class MeasurementController {
 //    public MeasurementDTO getLatestMeasurement() {
 //        return latestMeasurement;
 //    }
-
-}
