@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Information Display</title>
+  <style>
+    #display {
+      font-size: 2em;
+      margin: 20px;
+    }
+    .warning {
+      color: red;
+    }
+    #alarm {
+      display: none;
+      color: red;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+<div id="display">
+  <p>Pressure: <span id="pressure" th:text="${measurement.pressureDTO.value}">0</span></p>
+  <p>Temperature: <span id="temperature" th:text="${measurement.temperatureDTO.value}">0</span></p>
+</div>
+<div id="alarm">Alarm! Threshold Exceeded!</div>
+<script>
+  const pressureElement = document.getElementById('pressure');
+  const temperatureElement = document.getElementById('temperature');
+  const alarmElement = document.getElementById('alarm');
+  const pressureThreshold = 1000; // Пример порогового значения для давления
+  const temperatureThreshold = 100; // Пример порогового значения для температуры
+
+  function fetchData() {
+    fetch('/measurement/latest-measurement')
+            .then(response => response.json())
+            .then(data => {
+              const pressure = data.pressureDTO.value;
+              const temperature = data.temperatureDTO.value;
+
+              pressureElement.textContent = pressure;
+              temperatureElement.textContent = temperature;
+
+              if (pressure > pressureThreshold || temperature > temperatureThreshold) {
+                alarmElement.style.display = 'block';
+                alarmElement.classList.add('warning');
+                //playSound();
+              } else {
+                alarmElement.style.display = 'none';
+                alarmElement.classList.remove('warning');
+              }
+            });
+  }
+
+  // function playSound() {
+  //   const audio = new Audio('alarm-sound.mp3'); // Укажите путь к вашему звуковому файлу
+  //   audio.play();
+  // }
+
+  setInterval(fetchData, 2500); // Запрашивать данные каждые 5 секунд
+</script>
+</body>
+</html>
