@@ -78,7 +78,6 @@ public class Main {
         private static double getAnalogValue() {
             return VOLTAGE_MIN + (VOLTAGE_MAX - VOLTAGE_MIN) * random.nextDouble();
         }
-
     }
 
 
@@ -87,7 +86,7 @@ public class Main {
         final static double DIGITAL_VALUE_MIN = 0;
         final static double DIGITAL_VALUE_MAX = 4095 ;
         public static double adc(double analogVoltage) {
-            double digitalValue = (analogVoltage / U5244_000005_030PA.VOLTAGE_MIN) * DIGITAL_VALUE_MAX;
+            double digitalValue = (analogVoltage / U5244_000005_030PA.VOLTAGE_MAX) * DIGITAL_VALUE_MAX;
             return digitalValue;
         }
 
@@ -117,7 +116,7 @@ public class Main {
 
             double pressure = pressureMix + ((digitalValue - DIGITAL_VALUE_MIN) * (pressureMax - pressureMix)) /
                     (DIGITAL_VALUE_MAX - DIGITAL_VALUE_MIN);
-            return Math.floor(pressure);
+            return pressure;
         }
     }
 }
