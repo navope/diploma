@@ -12,7 +12,7 @@ import java.util.*;
 
 public class Main {
 
-    public final static int QUANTITY  = 100;
+    public final static int QUANTITY  = 20;
 //    public static void main(String[] args) {
 //        for (int i = 0; i < 50; i ++) {
 //            System.out.println(STM32F103C8T6.getPressure());
@@ -62,10 +62,13 @@ public class Main {
         final static double VOLTAGE_OFFSET = 0.5;
         public static final double VOLTAGE_MIN = 0.1;
         public static final double VOLTAGE_MAX = 1.75;
+        public static final double NOISE_LEVEL = 0.2;
         private static final Random random = new Random();
 
         public static double getAnalogValue() {
-            return VOLTAGE_MIN + (VOLTAGE_MAX - VOLTAGE_MIN) * random.nextDouble();
+            //return VOLTAGE_MIN + (VOLTAGE_MAX - VOLTAGE_MIN) * random.nextDouble();
+            double noise = random.nextDouble() * NOISE_LEVEL;
+            return VOLTAGE_MIN + (VOLTAGE_MAX - VOLTAGE_MIN) * 0.35 + noise;
         }
     }
 
@@ -74,8 +77,12 @@ public class Main {
         private static final double VOLTAGE_MAX = 5.0;
         private static final Random random = new Random();
 
+        public static final double NOISE_LEVEL = 0.7;
+
         public static double getAnalogValue() {
-            return VOLTAGE_MIN + (VOLTAGE_MAX - VOLTAGE_MIN) * random.nextDouble();
+            //return VOLTAGE_MIN + (VOLTAGE_MAX - VOLTAGE_MIN) * random.nextDouble();
+            double noise = random.nextDouble() * NOISE_LEVEL;
+            return VOLTAGE_MIN + (VOLTAGE_MAX - VOLTAGE_MIN) * 0.3 + noise;
         }
     }
 
@@ -102,14 +109,16 @@ public class Main {
 
         public static double getTemperature() {
             double digitalValue = adc(TMP36.getAnalogValue());
-            return convertVoltageToTemperature(digitalValue);
+            //return convertVoltageToTemperature(digitalValue);
+            return Math.round(convertVoltageToTemperature(digitalValue));
         }
 
         public static double getPressure() {
             double analogValue = U5244_000005_030PA.getAnalogValue();
             double convertedValue = VoltageDivider.convert(analogValue);
             double digitalValue = adc(convertedValue);
-            return convertVoltageToPressure(digitalValue);
+            //return convertVoltageToPressure(digitalValue);
+            return Math.round(convertVoltageToPressure(digitalValue));
         }
 
         public static double convertVoltageToTemperature(double digitalValue) {
