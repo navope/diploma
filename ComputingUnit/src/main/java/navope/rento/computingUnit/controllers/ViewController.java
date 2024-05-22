@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 @RequiredArgsConstructor
-public class MonitoringController {
+public class ViewController {
 
     @GetMapping("/")
     public String index() {

@@ -6,13 +6,13 @@ import javax.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "pressure")
+@Table(name = "measurement")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @Builder
-public class Pressure {
+public class Measurement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -21,6 +21,8 @@ public class Pressure {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "received_at")
     private Date receivedAt;
-    @Column(name = "value")
-    private double value;
+    @Column(name = "pressure")
+    private double pressure;
+    @Column(name = "temperature")
+    private double temperature;
 }

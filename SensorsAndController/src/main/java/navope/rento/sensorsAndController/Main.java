@@ -22,11 +22,11 @@ public class Main {
         String getMonitoringStateUrl = "http://localhost:8080/measurement/monitoring_state";
 
 
+        int i = 0;
         //Adding measurement
         while (Boolean.FALSE.equals(isStopReading)) {
             ResponseEntity<Boolean> response = restTemplate.getForEntity(getMonitoringStateUrl, Boolean.class);
             isStopReading = response.getBody();
-            int i = 0;
             try {
                 PressureDTO pressureDTO = PressureDTO.builder()
                         .value(STM32F103C8T6.getPressure())
@@ -38,10 +38,10 @@ public class Main {
                         .build();
                 System.out.println(i + " - " + restTemplate.postForObject(postMeasurementUrl,
                         new HttpEntity<>(new MeasurementDTO(pressureDTO,temperatureDTO)), HttpStatus.class));
+                i++;
                 Thread.sleep(3000);
             }catch (HttpClientErrorException e){
                 System.out.println(i + " - Fail!");
-                i++;
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -49,9 +49,6 @@ public class Main {
     }
 
     public static class TMP36 {
-        public static final double POWER_SUPPLY_VOLTAGE = 2.7;
-        public static final double THRESHOLD_VALUE_VOLTAGE_IN_DIGITAL_FORM = 81.92;
-        public static final double TEMPERATURE_MIN = -40;
         final static double VOLTAGE_OFFSET = 0.5;
         public static final double VOLTAGE_MIN = 0.1;
         public static final double VOLTAGE_MAX = 1.75;

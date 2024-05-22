@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import navope.rento.computingUnit.dto.AlertDTO;
 import navope.rento.computingUnit.dto.MeasurementDTO;
 
+import navope.rento.computingUnit.services.MeasurementService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -16,6 +17,7 @@ public class MeasurementController {
     private Boolean isMonitoring = false;
     private Boolean isStopReading = false;
     private final SimpMessagingTemplate messagingTemplate;
+    private final MeasurementService measurementService;
 
     @PostMapping("/new")
     public ResponseEntity<HttpStatus> receiveMeasurement(@RequestBody MeasurementDTO measurement) {
@@ -23,30 +25,9 @@ public class MeasurementController {
         double temperature = measurement.getTemperatureDTO().getValue();
 
         if (isMonitoring) {
-            final double PRESSURE_MIN = 60000;
-            final double PRESSURE_MAX = 115000;
-            final double TEMPERATURE_MIN = 10;
-            final double TEMPERATURE_MAX = 28;
-
-            boolean pressureAlert = pressure < PRESSURE_MIN || pressure > PRESSURE_MAX;
-            boolean temperatureAlert = temperature < TEMPERATURE_MIN || temperature > TEMPERATURE_MAX;
-
-            AlertDTO alert = new AlertDTO();
-            alert.setPressure(pressure);
-            alert.setTemperature(temperature);
-            alert.setPressureAlert(pressureAlert);
-            alert.setTemperatureAlert(temperatureAlert);
-
-            if (pressureAlert && temperatureAlert) {
-                alert.setMessage("Предупреждение! Превышены пороговые значения давления и температуры!");
-            } else if (pressureAlert) {
-                alert.setMessage("Предупреждение! Превышен порог давления!");
-            } else if (temperatureAlert) {
-                alert.setMessage("Предупреждение! Превышен порог температуры!");
-            } else {
-                alert.setMessage("Показания в норме.");
-            }
-            messagingTemplate.convertAndSend("/topic/alerts", alert);
+            measurementService.saveMeasurement(temperature, pressure);
+            messagingTemplate.convertAndSend("/topic/alerts",
+                    measurementService.analysisMeasurement(temperature,pressure));
         }
         return ResponseEntity.ok(HttpStatus.OK);
     }
