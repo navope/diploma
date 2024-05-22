@@ -7,8 +7,7 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
-//processedMeasurement
-public class AlertDTO {
+public class ProcessedMeasurementDTO {
     private String message;
     private boolean pressureAlert;
     private boolean temperatureAlert;

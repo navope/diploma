@@ -1,7 +1,6 @@
 package navope.rento.computingUnit.controllers;
 
 import lombok.RequiredArgsConstructor;
-import navope.rento.computingUnit.dto.AlertDTO;
 import navope.rento.computingUnit.dto.MeasurementDTO;
 
 import navope.rento.computingUnit.services.MeasurementService;
