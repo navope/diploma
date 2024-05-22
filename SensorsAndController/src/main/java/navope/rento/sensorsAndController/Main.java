@@ -11,30 +11,22 @@ import java.util.*;
 
 
 public class Main {
-
-    public final static int QUANTITY  = 20;
-//    public static void main(String[] args) {
-//        for (int i = 0; i < 50; i ++) {
-//            System.out.println(STM32F103C8T6.getPressure());
-//        }
-//    }
-
     public static void main(String[] args) {
 
         RestTemplate restTemplate = new RestTemplate();
 
-        // MicrocontrollerDTO microcontroller = new MicrocontrollerDTO("SM32");
-
         Random random = new Random();
+        Boolean isStopReading = false;
 
         String postMeasurementUrl = "http://localhost:8080/measurement/new";
+        String getMonitoringStateUrl = "http://localhost:8080/measurement/monitoring_state";
 
-        //register Microcontroller
-//        System.out.println(restTemplate.postForObject(registerSensorUrl,
-//                sensor,HttpStatus.class));
 
         //Adding measurement
-        for (int i =0 ; i < QUANTITY; i++) {
+        while (Boolean.FALSE.equals(isStopReading)) {
+            ResponseEntity<Boolean> response = restTemplate.getForEntity(getMonitoringStateUrl, Boolean.class);
+            isStopReading = response.getBody();
+            int i = 0;
             try {
                 PressureDTO pressureDTO = PressureDTO.builder()
                         .value(STM32F103C8T6.getPressure())
@@ -49,6 +41,7 @@ public class Main {
                 Thread.sleep(3000);
             }catch (HttpClientErrorException e){
                 System.out.println(i + " - Fail!");
+                i++;
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
