@@ -73,6 +73,7 @@ public class Main {
             //return VOLTAGE_MIN + (VOLTAGE_MAX - VOLTAGE_MIN) * random.nextDouble();
             double noise = random.nextDouble() * NOISE_LEVEL;
             return VOLTAGE_MIN + (VOLTAGE_MAX - VOLTAGE_MIN) * 0.3 + noise;
+            //return 5;
         }
     }
 
@@ -82,8 +83,8 @@ public class Main {
 
         public static double convert(double inputVoltage) {
 //            double coefficient = (double) Math.round((R2 / (R1 + R2) * 100)) / 100;
-            double coefficient = (R2 / (R1 + R2));
-            return inputVoltage * coefficient;
+            double coefficient = (R2 / (R1 + R2)); // 0.66
+            return inputVoltage * coefficient; // [1;5] - > [0.66; 3.3]
         }
     }
 
