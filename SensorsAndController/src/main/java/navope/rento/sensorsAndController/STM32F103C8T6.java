@@ -1,8 +1,5 @@
 package navope.rento.sensorsAndController;
 
-import navope.rento.sensorsAndController.dto.MeasurementDTO;
-import navope.rento.sensorsAndController.dto.PressureDTO;
-import navope.rento.sensorsAndController.dto.TemperatureDTO;
 import org.springframework.http.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -10,12 +7,14 @@ import org.springframework.web.client.RestTemplate;
 import java.util.*;
 
 
-public class Main {
+public class STM32F103C8T6 {
+    final static double REFERENCE_VOLTAGE = 3.3;
+    final static double DIGITAL_VALUE_MIN = 0;
+    final static double DIGITAL_VALUE_MAX = 4095;
     public static void main(String[] args) {
 
         RestTemplate restTemplate = new RestTemplate();
 
-        Random random = new Random();
         Boolean isStopReading = false;
 
         String postMeasurementUrl = "http://localhost:8080/measurement/new";
@@ -28,16 +27,8 @@ public class Main {
             ResponseEntity<Boolean> response = restTemplate.getForEntity(getMonitoringStateUrl, Boolean.class);
             isStopReading = response.getBody();
             try {
-                PressureDTO pressureDTO = PressureDTO.builder()
-                        .value(STM32F103C8T6.getPressure())
-                        .receivedAt(new Date())
-                        .build();
-                TemperatureDTO temperatureDTO = TemperatureDTO.builder()
-                        .value(STM32F103C8T6.getTemperature())
-                        .receivedAt(new Date())
-                        .build();
                 System.out.println(i + " - " + restTemplate.postForObject(postMeasurementUrl,
-                        new HttpEntity<>(new MeasurementDTO(pressureDTO,temperatureDTO)), HttpStatus.class));
+                        new HttpEntity<>(new MeasurementDTO(getPressure(), getTemperature())), HttpStatus.class));
                 i++;
                 Thread.sleep(3000);
             }catch (HttpClientErrorException e){
@@ -47,6 +38,38 @@ public class Main {
             }
         }
     }
+
+        public static double adc(double analogVoltage) {
+            double digitalValue = (analogVoltage / REFERENCE_VOLTAGE) * DIGITAL_VALUE_MAX;
+            return Math.floor(digitalValue);
+        }
+
+        public static double getTemperature() {
+            double digitalValue = adc(TMP36.getAnalogValue());
+            //return convertVoltageToTemperature(digitalValue);
+            return Math.round(convertVoltageToTemperature(digitalValue));
+        }
+
+        public static double getPressure() {
+            double analogValue = U5244_000005_030PA.getAnalogValue();
+            double convertedValue = VoltageDivider.convert(analogValue);
+            double digitalValue = adc(convertedValue);
+            //return convertVoltageToPressure(digitalValue);
+            return Math.round(convertVoltageToPressure(digitalValue));
+        }
+
+        public static double convertVoltageToTemperature(double digitalValue) {
+            return (digitalValue * REFERENCE_VOLTAGE / DIGITAL_VALUE_MAX - TMP36.VOLTAGE_OFFSET) / 0.01;
+        }
+
+        public static double convertVoltageToPressure(double digitalValue) {
+            final double psiToPascal = 6894.76;
+            final double pressureMaxPsi = 30.0;
+            final double pressureMax = pressureMaxPsi * psiToPascal;
+
+            double pressure = (digitalValue / DIGITAL_VALUE_MAX) * pressureMax;
+            return pressure;
+        }
 
     public static class TMP36 {
         final static double VOLTAGE_OFFSET = 0.5;
@@ -85,47 +108,6 @@ public class Main {
 //            double coefficient = (double) Math.round((R2 / (R1 + R2) * 100)) / 100;
             double coefficient = (R2 / (R1 + R2)); // 0.66
             return inputVoltage * coefficient; // [1;5] - > [0.66; 3.3]
-        }
-    }
-
-    public static class STM32F103C8T6 {
-        final static double REFERENCE_VOLTAGE = 3.3;
-        final static double DIGITAL_VALUE_MIN = 0;
-        final static double DIGITAL_VALUE_MAX = 4095;
-
-        public static double adc(double analogVoltage) {
-            double digitalValue = (analogVoltage / REFERENCE_VOLTAGE) * DIGITAL_VALUE_MAX;
-            return Math.floor(digitalValue);
-        }
-
-        public static double getTemperature() {
-            double digitalValue = adc(TMP36.getAnalogValue());
-            //return convertVoltageToTemperature(digitalValue);
-            return Math.round(convertVoltageToTemperature(digitalValue));
-        }
-
-        public static double getPressure() {
-            double analogValue = U5244_000005_030PA.getAnalogValue();
-            double convertedValue = VoltageDivider.convert(analogValue);
-            double digitalValue = adc(convertedValue);
-            //return convertVoltageToPressure(digitalValue);
-            return Math.round(convertVoltageToPressure(digitalValue));
-        }
-
-        public static double convertVoltageToTemperature(double digitalValue) {
-            return (digitalValue * REFERENCE_VOLTAGE / DIGITAL_VALUE_MAX - TMP36.VOLTAGE_OFFSET) / 0.01;
-        }
-
-        public static double convertVoltageToPressure(double digitalValue) {
-            final double psiToPascal = 6894.76;
-            final double pressureMaxPsi = 30.0;
-            final double pressureMinPsi = 0.0;
-            final double pressureMax = pressureMaxPsi * psiToPascal;
-            final double pressureMin = pressureMinPsi * psiToPascal;
-
-            double pressure = pressureMin + ((digitalValue - DIGITAL_VALUE_MIN) * (pressureMax - pressureMin)) /
-                    (DIGITAL_VALUE_MAX - DIGITAL_VALUE_MIN);
-            return pressure;
         }
     }
 }

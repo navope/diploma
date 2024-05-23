@@ -8,10 +8,8 @@ import java.util.Date;
 @Entity
 @Table(name = "measurement")
 @NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
-@Builder
 public class Measurement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,4 +23,10 @@ public class Measurement {
     private double pressure;
     @Column(name = "temperature")
     private double temperature;
+
+    public Measurement(Date receivedAt, double pressure, double temperature) {
+        this.receivedAt = receivedAt;
+        this.pressure = pressure;
+        this.temperature = temperature;
+    }
 }

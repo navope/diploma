@@ -6,7 +6,6 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Setter
-@Builder
 public class ProcessedMeasurementDTO {
     private String message;
     private boolean pressureAlert;

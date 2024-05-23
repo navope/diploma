@@ -1,4 +1,4 @@
-package navope.rento.computingUnit.dto;
+package navope.rento.sensorsAndController;
 
 import lombok.*;
 

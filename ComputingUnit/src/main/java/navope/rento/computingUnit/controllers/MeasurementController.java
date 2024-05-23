@@ -20,8 +20,8 @@ public class MeasurementController {
 
     @PostMapping("/new")
     public ResponseEntity<HttpStatus> receiveMeasurement(@RequestBody MeasurementDTO measurement) {
-        double pressure = measurement.getPressureDTO().getValue();
-        double temperature = measurement.getTemperatureDTO().getValue();
+        double pressure = measurement.getPressure();
+        double temperature = measurement.getTemperature();
 
         if (isMonitoring) {
             measurementService.saveMeasurement(temperature, pressure);

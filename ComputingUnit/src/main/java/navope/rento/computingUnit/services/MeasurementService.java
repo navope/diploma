@@ -11,18 +11,13 @@ import java.util.Date;
 @Service
 @RequiredArgsConstructor
 public class MeasurementService {
-    final static double PRESSURE_MIN = 60000;
-    final static double PRESSURE_MAX = 115000;
-    final static double TEMPERATURE_MIN = 10;
+    final static double PRESSURE_MIN = 75000;
+    final static double PRESSURE_MAX = 85000;
+    final static double TEMPERATURE_MIN = 20;
     final static double TEMPERATURE_MAX = 28;
     private final MeasurementRepository measurementRepository;
     public void saveMeasurement(double temperatureValue, double pressureValue) {
-        Measurement measurement = Measurement.builder()
-                .receivedAt(new Date())
-                .pressure(pressureValue)
-                .temperature(temperatureValue)
-                .build();
-        measurementRepository.save(measurement);
+        measurementRepository.save(new Measurement(new Date(), pressureValue, temperatureValue));
     }
 
     public ProcessedMeasurementDTO analysisMeasurement(double temperature, double pressure) {
