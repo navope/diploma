@@ -20,7 +20,6 @@ public class STM32F103C8T6 {
         String postMeasurementUrl = "http://localhost:8080/measurement/new";
         String getMonitoringStateUrl = "http://localhost:8080/measurement/monitoring_state";
 
-
         int i = 0;
         //Adding measurement
         while (Boolean.FALSE.equals(isStopReading)) {
@@ -81,7 +80,7 @@ public class STM32F103C8T6 {
         public static double getAnalogValue() {
             //return VOLTAGE_MIN + (VOLTAGE_MAX - VOLTAGE_MIN) * random.nextDouble();
             double noise = random.nextDouble() * NOISE_LEVEL;
-            return VOLTAGE_MIN + (VOLTAGE_MAX - VOLTAGE_MIN) * 0.35 + noise;
+            return VOLTAGE_MIN + (VOLTAGE_MAX - VOLTAGE_MIN) * 0.33 + noise;
         }
     }
 
@@ -90,12 +89,12 @@ public class STM32F103C8T6 {
         private static final double VOLTAGE_MAX = 5.0;
         private static final Random random = new Random();
 
-        public static final double NOISE_LEVEL = 0.7;
+        public static final double NOISE_LEVEL = 0.4;
 
         public static double getAnalogValue() {
             //return VOLTAGE_MIN + (VOLTAGE_MAX - VOLTAGE_MIN) * random.nextDouble();
             double noise = random.nextDouble() * NOISE_LEVEL;
-            return VOLTAGE_MIN + (VOLTAGE_MAX - VOLTAGE_MIN) * 0.3 + noise;
+            return VOLTAGE_MIN + (VOLTAGE_MAX - VOLTAGE_MIN) * 0.2 + noise;
             //return 5;
         }
     }
