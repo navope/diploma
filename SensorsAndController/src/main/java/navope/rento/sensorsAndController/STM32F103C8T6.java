@@ -45,7 +45,6 @@ public class STM32F103C8T6 {
 
         public static double getTemperature() {
             double digitalValue = adc(TMP36.getAnalogValue());
-            //return convertVoltageToTemperature(digitalValue);
             return Math.round(convertVoltageToTemperature(digitalValue));
         }
 
@@ -74,13 +73,12 @@ public class STM32F103C8T6 {
         final static double VOLTAGE_OFFSET = 0.5;
         public static final double VOLTAGE_MIN = 0.1;
         public static final double VOLTAGE_MAX = 1.75;
-        public static final double NOISE_LEVEL = 0.2;
+        public static final double NOISE_LEVEL = 0.1;
         private static final Random random = new Random();
 
         public static double getAnalogValue() {
-            //return VOLTAGE_MIN + (VOLTAGE_MAX - VOLTAGE_MIN) * random.nextDouble();
             double noise = random.nextDouble() * NOISE_LEVEL;
-            return VOLTAGE_MIN + (VOLTAGE_MAX - VOLTAGE_MIN) * 0.33 + noise;
+            return VOLTAGE_MIN + (VOLTAGE_MAX - VOLTAGE_MIN) * 0.35 + noise;
         }
     }
 
@@ -89,13 +87,11 @@ public class STM32F103C8T6 {
         private static final double VOLTAGE_MAX = 5.0;
         private static final Random random = new Random();
 
-        public static final double NOISE_LEVEL = 0.4;
+        public static final double NOISE_LEVEL = 0.6;
 
         public static double getAnalogValue() {
-            //return VOLTAGE_MIN + (VOLTAGE_MAX - VOLTAGE_MIN) * random.nextDouble();
             double noise = random.nextDouble() * NOISE_LEVEL;
-            return VOLTAGE_MIN + (VOLTAGE_MAX - VOLTAGE_MIN) * 0.2 + noise;
-            //return 5;
+            return VOLTAGE_MIN + (VOLTAGE_MAX - VOLTAGE_MIN) * 0.38 - noise;
         }
     }
 
@@ -104,7 +100,6 @@ public class STM32F103C8T6 {
         private static final double R2 = 3300; // 3.3 kOhm
 
         public static double convert(double inputVoltage) {
-//            double coefficient = (double) Math.round((R2 / (R1 + R2) * 100)) / 100;
             double coefficient = (R2 / (R1 + R2)); // 0.66
             return inputVoltage * coefficient; // [1;5] - > [0.66; 3.3]
         }
