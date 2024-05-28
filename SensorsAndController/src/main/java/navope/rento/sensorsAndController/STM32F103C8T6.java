@@ -57,7 +57,7 @@ public class STM32F103C8T6 {
         }
 
         public static double convertVoltageToTemperature(double digitalValue) {
-            return (digitalValue * REFERENCE_VOLTAGE / DIGITAL_VALUE_MAX - TMP36.VOLTAGE_OFFSET) / 0.01;
+            return (digitalValue * REFERENCE_VOLTAGE / DIGITAL_VALUE_MAX - TMP36.VOLTAGE_OFFSET) * 100;
         }
 
         public static double convertVoltageToPressure(double digitalValue) {
@@ -65,7 +65,7 @@ public class STM32F103C8T6 {
             final double pressureMaxPsi = 30.0;
             final double pressureMax = pressureMaxPsi * psiToPascal;
 
-            double pressure = (digitalValue / DIGITAL_VALUE_MAX) * pressureMax;
+            double pressure = ((digitalValue * REFERENCE_VOLTAGE - 2702.7) / 10810.8) * pressureMax;
             return pressure;
         }
 
@@ -87,11 +87,11 @@ public class STM32F103C8T6 {
         private static final double VOLTAGE_MAX = 5.0;
         private static final Random random = new Random();
 
-        public static final double NOISE_LEVEL = 0.6;
+        public static final double NOISE_LEVEL = 0.62;
 
         public static double getAnalogValue() {
             double noise = random.nextDouble() * NOISE_LEVEL;
-            return VOLTAGE_MIN + (VOLTAGE_MAX - VOLTAGE_MIN) * 0.38 - noise;
+            return VOLTAGE_MIN + (VOLTAGE_MAX - VOLTAGE_MIN) * 0.5 - noise;
         }
     }
 
